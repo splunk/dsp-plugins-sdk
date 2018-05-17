@@ -1,0 +1,72 @@
+apply plugin: 'java'
+
+repositories {
+    maven {
+        name "Splunk Mirror - All"
+        url "https://repo.splunk.com/artifactory/maven/"
+    }
+}
+
+dependencies {
+    compile group: 'com.google.guava', name: 'guava', version: '15.0'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
+    compile group: 'org.apache.flink', name: 'flink-streaming-java_2.11', version: '1.3.2'
+
+    compile group: 'com.splunk', name: 'splunk-streaming-flink-streams', version: '2.4.0-SNAPSHOT'
+    compile group: 'com.splunk', name: 'splunk-streaming-upl', version: '2.4.0-SNAPSHOT'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '1.9.5'
+}
+
+// Run this task to create initial project template.
+task expandTemplates(type: Copy) {
+    group 'templates'
+    description 'Perform initial template expansion. Will overwrite any existing source.'
+
+    from ("${project.rootDir}/templates") {
+      expand(project.properties)
+    }
+    into "${project.rootDir}/src"
+    outputs.upToDateWhen { false }
+    doLast {
+      // Rename streaming implementation templates
+      def mainDirBase = "${project.rootDir}/src/main/java/com/splunk/streaming/user/"
+      renameJavaFile(mainDirBase+"functions/", "StreamingFunction.java", "${project.properties.SDK_CLASS_NAME}Function.java")
+      renameJavaFile(mainDirBase+"plugins/", "StreamingPlanner.java", "${project.properties.SDK_CLASS_NAME}Planner.java")
+
+      // Rename streaming test templates
+      def testDirBase = "${project.rootDir}/src/test/java/com/splunk/streaming/user/"
+      renameJavaFile(testDirBase, "TestStreamingFunction.java", "Test${project.properties.SDK_CLASS_NAME}Function.java")
+      renameJavaFile(testDirBase, "TestStreamingPlanner.java", "Test${project.properties.SDK_CLASS_NAME}Planner.java")
+
+      // Add plugin to META-INF/services file
+      def resourcesBase = "${project.rootDir}/src/main/resources/META-INF/services/"
+      new File(resourcesBase).mkdirs()
+      addLine(resourcesBase+"com.splunk.streaming.upl3.plugins.Plugin", "com.splunk.streaming.user.functions.${SDK_CLASS_NAME}Function")
+      addLine(resourcesBase+"com.splunk.streaming.flink.streams.plugin.SplunkStreamsPlugin", "com.splunk.streaming.user.plugins.${SDK_CLASS_NAME}Planner")
+    }
+}
+
+ext.renameJavaFile = { dir, templateName, newFilename ->
+  if (!dir.endsWith('/')) {
+    throw new InvalidUserDataException("directory should end in slash: " + dir)
+  }
+  file(dir+templateName).renameTo(file(dir+newFilename))
+}
+
+ext.addLine = { filename, newLine ->
+  def lineFound = false
+  def file = new File(filename)
+  file.createNewFile() // create file if doesn't exist
+
+  file.readLines().each { line ->
+    if (line.trim() == newLine) {
+      lineFound = true
+    }
+  }
+  if (!lineFound) {
+    file.append(newLine+"\n")
+  }
+}
