@@ -110,7 +110,8 @@ def cleanGradleHome(String imageName) {
 }
 
 def gradleExpandTemplates(String imageName) {
-  shellInsideImage(imageName, [createGradleCommand("expandTemplates -PSDK_CLASS_NAME=ReadStuff -PSDK_FUNCTION_NAME=read-stuff -PSDK_UI_NAME='Read Stuff'")])
+  shellInsideImage(imageName, [createGradleCommand("expandTemplates -PSDK_FUNCTION_TYPE=streaming -PSDK_CLASS_NAME=ReadStuff -PSDK_FUNCTION_NAME=read-stuff -PSDK_UI_NAME='Read Stuff'")])
+  shellInsideImage(imageName, [createGradleCommand("expandTemplates -PSDK_FUNCTION_TYPE=scalar -PSDK_CLASS_NAME=ConvertStuff -PSDK_FUNCTION_NAME=convert-stuff -PSDK_UI_NAME='Convert Stuff'")])
 }
 
 def gradleCompile(String imageName) {

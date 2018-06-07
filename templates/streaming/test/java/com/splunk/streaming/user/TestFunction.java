@@ -1,3 +1,7 @@
+/*
+ * ${SDK_COPYRIGHT_NOTICE}
+ */
+
 package com.splunk.streaming.user;
 
 import com.splunk.streaming.upl3.language.FunctionDefinition;

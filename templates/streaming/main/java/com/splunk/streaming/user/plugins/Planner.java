@@ -1,3 +1,7 @@
+/*
+ * ${SDK_COPYRIGHT_NOTICE}
+ */
+
 package com.splunk.streaming.user.plugins;
 
 import com.google.common.base.Preconditions;
