@@ -23,7 +23,7 @@ public class ${SDK_CLASS_NAME}Function implements SinkFunction {
   public FunctionType getFunctionType() {
     return FunctionType.newSinkFunctionBuilder()
       //.returns(AnyType.INSTANCE) //TODO: Add Return type here
-      //.addArgument("foo", StringType.INSTANCE //TODO: Add arguments here
+      //.addArgument("foo", StringType.INSTANCE) //TODO: Add arguments here
       .build();
   }
 
