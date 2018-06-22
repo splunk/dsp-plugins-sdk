@@ -64,18 +64,31 @@ task expandTemplates(type: Copy) {
     // Rename streaming implementation templates
     def mainDirBase = "${project.rootDir}/src/main/java/com/splunk/streaming/user/"
     renameJavaFile(mainDirBase+"functions/", "Function.java", "${project.properties.SDK_CLASS_NAME}Function.java")
-    renameJavaFile(mainDirBase+"plugins/", "Planner.java", "${project.properties.SDK_CLASS_NAME}Planner.java")
 
     // Rename streaming test templates
     def testDirBase = "${project.rootDir}/src/test/java/com/splunk/streaming/user/"
     renameJavaFile(testDirBase, "TestFunction.java", "Test${project.properties.SDK_CLASS_NAME}Function.java")
-    renameJavaFile(testDirBase, "TestPlanner.java", "Test${project.properties.SDK_CLASS_NAME}Planner.java")
 
     // Add plugin to META-INF/services file
     def resourcesBase = "${project.rootDir}/src/main/resources/META-INF/services/"
     new File(resourcesBase).mkdirs()
-    addLine(resourcesBase+"com.splunk.streaming.upl3.plugins.Plugin", "com.splunk.streaming.user.functions.${SDK_CLASS_NAME}Function")
-    addLine(resourcesBase+"com.splunk.streaming.flink.streams.plugin.SplunkStreamsPlugin", "com.splunk.streaming.user.plugins.${SDK_CLASS_NAME}Planner")
+
+    String className = "";
+    switch (project.properties.get('SDK_FUNCTION_TYPE')) {
+      case "scalar":
+        className = "com.splunk.streaming.upl3.core.ScalarFunction"
+        break
+      case "streaming":
+        className = "com.splunk.streaming.flink.streams.core.StreamingFunction"
+        break
+      case "sink":
+        className = "com.splunk.streaming.flink.streams.core.SinkFunction"
+        break
+      default:
+        throw new InvalidUserDataException("Unknown SDK function type: ${project.properties.get('SDK_FUNCTION_TYPE')}")
+        break
+    }
+    addLine(resourcesBase + className, "com.splunk.streaming.user.functions.${SDK_CLASS_NAME}Function")
   }
 }
 

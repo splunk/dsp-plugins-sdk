@@ -4,8 +4,7 @@
 
 package com.splunk.streaming.user.functions;
 
-import com.splunk.streaming.data.Tuple;
-import com.splunk.streaming.flink.streams.core.StreamingFunction;
+import com.splunk.streaming.flink.streams.core.SinkFunction;
 import com.splunk.streaming.upl3.core.PlannerContext;
 import com.splunk.streaming.upl3.language.Category;
 import com.splunk.streaming.upl3.plugins.Attributes;
@@ -14,16 +13,15 @@ import com.splunk.streaming.upl3.type.FunctionType;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import java.util.List;
 import java.util.Map;
 
-public class ${SDK_CLASS_NAME}Function implements StreamingFunction {
+public class ${SDK_CLASS_NAME}Function implements SinkFunction {
 
   @Override
   public FunctionType getFunctionType() {
-    return FunctionType.newStreamingFunctionBuilder()
+    return FunctionType.newSinkFunctionBuilder()
       //.returns(AnyType.INSTANCE) //TODO: Add Return type here
       //.addArgument("foo", StringType.INSTANCE //TODO: Add arguments here
       .build();
@@ -36,7 +34,7 @@ public class ${SDK_CLASS_NAME}Function implements StreamingFunction {
 
   @Override
   public List<Category> getCategories() {
-    return ImmutableList.of(Categories.FUNCTION.getCategory()); //TODO: Change to SOURCE if needed
+    return ImmutableList.of(Categories.SINK.getCategory());
   }
 
   @Override
@@ -49,8 +47,8 @@ public class ${SDK_CLASS_NAME}Function implements StreamingFunction {
   }
 
   @Override
-  public DataStream<Tuple> plan(PlannerContext context, StreamExecutionEnvironment streamExecutionEnvironment) {
-    return null; //TODO: Add implementation here
+  public void plan(PlannerContext context, StreamExecutionEnvironment streamExecutionEnvironment) {
+    //TODO: Add implementation here
   }
 
 }
