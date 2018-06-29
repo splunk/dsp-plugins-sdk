@@ -1,0 +1,39 @@
+
+ext {
+
+  //Major inspirations from :
+  //https://www.michael-bull.com/blog/2016/06/04/separating-integration-and-unit-tests-with-gradle
+  applyIntegrationTests = {
+
+    project.configurations {
+      integrationTestCompile.extendsFrom testCompile
+      integrationTestRuntime.extendsFrom testRuntime
+    }
+
+    project.sourceSets {
+      integrationTest {
+        java.srcDir "src/test-it/java"
+        resources.srcDir "src/test-it/resources"
+      }
+    }
+
+    project.dependencies {
+      integrationTestCompile sourceSets.main.output
+      integrationTestCompile sourceSets.test.output
+    }
+
+    //noinspection GroovyAssignabilityCheck
+    project.task("integrationTest", type: org.gradle.api.tasks.testing.Test) {
+      description = 'Runs the integration tests.'
+      group = org.gradle.language.base.plugins.LifecycleBasePlugin.VERIFICATION_GROUP
+
+      testClassesDirs = sourceSets.integrationTest.output
+      classpath = sourceSets.integrationTest.compileClasspath +
+        sourceSets.integrationTest.runtimeClasspath
+
+    }
+
+    project.tasks.check.dependsOn integrationTest
+
+  }
+}

@@ -4,5 +4,5 @@
 
 package com.splunk.streaming.user;
 
-public class Test${SDK_CLASS_NAME}Function {
+public class Test${SDK_CLASS_NAME}FunctionIT {
 }

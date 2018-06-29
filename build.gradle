@@ -1,5 +1,8 @@
 apply plugin: 'java'
 
+apply from: "$rootDir/integration.gradle"
+applyIntegrationTests()
+
 repositories {
   maven {
     name "Splunk Mirror - All"
@@ -37,6 +40,7 @@ dependencies {
     testCompile dep
   }
 
+  testCompile group: 'com.splunk', name: 'splunk-streaming-flink-test', version: '2.4.0-SNAPSHOT'
   testCompile group: 'junit', name: 'junit', version: '4.12'
   testCompile group: 'org.mockito', name: 'mockito-core', version: '1.9.5'
 
@@ -66,8 +70,13 @@ task expandTemplates(type: Copy) {
     renameJavaFile(mainDirBase+"functions/", "Function.java", "${project.properties.SDK_CLASS_NAME}Function.java")
 
     // Rename streaming test templates
-    def testDirBase = "${project.rootDir}/src/test/java/com/splunk/streaming/user/"
-    renameJavaFile(testDirBase, "TestFunction.java", "Test${project.properties.SDK_CLASS_NAME}Function.java")
+    if (project.properties.get('SDK_FUNCTION_TYPE') == 'scalar') {
+      def testDirBase = "${project.rootDir}/src/test/java/com/splunk/streaming/user/"
+      renameJavaFile(testDirBase, "TestFunction.java", "Test${project.properties.SDK_CLASS_NAME}Function.java")
+    } else {
+      def testDirBase = "${project.rootDir}/src/test-it/java/com/splunk/streaming/user/"
+      renameJavaFile(testDirBase, "TestFunctionIT.java", "Test${project.properties.SDK_CLASS_NAME}FunctionIT.java")
+    }
 
     // Add plugin to META-INF/services file
     def resourcesBase = "${project.rootDir}/src/main/resources/META-INF/services/"
