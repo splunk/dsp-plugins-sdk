@@ -5,7 +5,7 @@ to create a custom plugin that runs in a BLAM pipeline.
 
 ## Build Requirements
 
-* Java 7
+* Java 8
 * Network access to repo.splunk.com
 
 ## Getting Started

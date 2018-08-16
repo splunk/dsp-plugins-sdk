@@ -7,8 +7,7 @@ final Integer TIMEOUT_TIME_PIPELINE = 60
 final Integer TIMEOUT_TIME_TEST = 60
 final String TIMEOUT_UNIT = 'MINUTES'
 
-// Docker images containing OpenJDK 7 or 8
-final String JDK7_ALPINE_IMAGE = 'openjdk:7u121-jdk'
+// Docker image containing OpenJDK 8
 final String JDK8_ALPINE_IMAGE = 'openjdk:8-jdk-alpine'
 
 pipeline {
@@ -37,7 +36,7 @@ pipeline {
         // If any gradle home already exists, remove it to isolate builds.
         // We do this at the start rather than the end so we can see the state following a build.
         script {
-          cleanGradleHome(JDK7_ALPINE_IMAGE)
+          cleanGradleHome(JDK8_ALPINE_IMAGE)
         }
       }
     }
@@ -48,7 +47,7 @@ pipeline {
       }
       steps {
         script {
-          gradleCompile(JDK7_ALPINE_IMAGE)
+          gradleCompile(JDK8_ALPINE_IMAGE)
         }
       }
     }
@@ -59,18 +58,7 @@ pipeline {
       }
       steps {
         script {
-          gradleCompile(JDK7_ALPINE_IMAGE)
-        }
-      }
-    }
-
-    stage('Build UnitTests Java7') {
-      options {
-        timeout(time: TIMEOUT_TIME_TEST, unit: TIMEOUT_UNIT)
-      }
-      steps {
-        script {
-          gradleUnitTestOnly(JDK7_ALPINE_IMAGE)
+          gradleCompile(JDK8_ALPINE_IMAGE)
         }
       }
     }
@@ -85,7 +73,6 @@ pipeline {
         }
       }
     }
-
   } //stages
 } // pipeline
 

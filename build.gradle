@@ -48,6 +48,11 @@ dependencies {
   // compile group: 'com.foo', name: 'bar', version: '1.0.0'
 }
 
+tasks.withType(JavaCompile) { JavaCompile task ->
+  task.sourceCompatibility = project.property("javaCompiler.sourceCompatibility")
+  task.targetCompatibility = project.property("javaCompiler.targetCompatibility")
+}
+
 task createPluginJar(dependsOn: shadowJar) {
   group 'build'
   description 'Create a plugin jar packaged with dependencies'
