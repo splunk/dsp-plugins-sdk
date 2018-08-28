@@ -1,0 +1,33 @@
+#
+# Copyright (c) 2018-2018 Splunk, Inc. All Right reserved
+
+variables:
+  DOCKER_IMAGE_JDK8: 'openjdk:8-jdk-alpine'
+
+image: $DOCKER_IMAGE_JDK8
+
+stages:
+  - expand
+  - build
+  - test
+
+expand:templates:
+  stage: expand
+  artifacts:
+    paths:
+      - 'src'
+  script:
+    - ./gradlew expandTemplates -PSDK_FUNCTION_TYPE=streaming -PSDK_CLASS_NAME=ReadStuff -PSDK_FUNCTION_NAME=read-stuff -PSDK_UI_NAME='Read Stuff'
+
+build:compile:
+  stage: build
+  artifacts:
+    paths:
+      - 'build'
+  script:
+    - ./gradlew clean compileJava compileTestJava --continue
+
+test:unit:
+  stage: test
+  script:
+    - ./gradlew test -x compileJava -x compileTestJava --continue
