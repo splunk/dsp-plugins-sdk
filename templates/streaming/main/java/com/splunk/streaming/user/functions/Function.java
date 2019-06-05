@@ -6,7 +6,7 @@ package com.splunk.streaming.user.functions;
 
 import com.splunk.streaming.data.Tuple;
 import com.splunk.streaming.flink.streams.core.StreamingFunction;
-import com.splunk.streaming.upl3.core.PlannerContext;
+import com.splunk.streaming.flink.streams.planner.PlannerContext;
 import com.splunk.streaming.upl3.language.Category;
 import com.splunk.streaming.upl3.plugins.Attributes;
 import com.splunk.streaming.upl3.plugins.Categories;
