@@ -21,7 +21,7 @@ public class ${SDK_CLASS_NAME}Function implements SinkFunction {
 
   @Override
   public FunctionType getFunctionType() {
-    return FunctionType.newSinkFunctionBuilder()
+    return FunctionType.newSinkFunctionBuilder(this)
       //.returns(AnyType.INSTANCE) //TODO: Add Return type here
       //.addArgument("foo", StringType.INSTANCE) //TODO: Add arguments here
       .build();

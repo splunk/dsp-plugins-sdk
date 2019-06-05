@@ -21,7 +21,7 @@ public class ${SDK_CLASS_NAME}Function implements ScalarFunction<Object> {
 
   @Override
   public FunctionType getFunctionType() {
-    return FunctionType.newScalarFunctionBuilder()
+    return FunctionType.newScalarFunctionBuilder(this)
       //.returns(AnyType.INSTANCE) //TODO: Add Return type here
       //.addArgument("foo", StringType.INSTANCE) //TODO: Add arguments here
       .build();
