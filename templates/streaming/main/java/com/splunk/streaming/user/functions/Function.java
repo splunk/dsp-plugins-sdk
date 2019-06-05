@@ -8,6 +8,7 @@ import com.splunk.streaming.data.Tuple;
 import com.splunk.streaming.flink.streams.core.StreamingFunction;
 import com.splunk.streaming.flink.streams.planner.PlannerContext;
 import com.splunk.streaming.upl3.language.Category;
+import com.splunk.streaming.upl3.node.FunctionCall;
 import com.splunk.streaming.upl3.plugins.Attributes;
 import com.splunk.streaming.upl3.plugins.Categories;
 import com.splunk.streaming.upl3.type.FunctionType;
@@ -49,7 +50,7 @@ public class ${SDK_CLASS_NAME}Function implements StreamingFunction {
   }
 
   @Override
-  public DataStream<Tuple> plan(PlannerContext context, StreamExecutionEnvironment streamExecutionEnvironment) {
+  public DataStream<Tuple> plan(FunctionCall functionCall, PlannerContext context, StreamExecutionEnvironment streamExecutionEnvironment) {
     return null; //TODO: Add implementation here
   }
 
