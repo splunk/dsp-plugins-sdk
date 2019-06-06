@@ -1,3 +1,8 @@
+import groovyx.net.http.ApacheEncoders
+import groovyx.net.http.FromServer
+import static groovyx.net.http.HttpBuilder.configure
+import static groovyx.net.http.MultipartContent.multipart
+
 apply plugin: 'java'
 
 apply from: "$rootDir/integration.gradle"
@@ -20,6 +25,8 @@ buildscript {
 
   dependencies {
     classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
+    classpath 'io.github.http-builder-ng:http-builder-ng-apache:1.0.3'
+    classpath 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.2'
   }
 }
 apply plugin: 'com.github.johnrengelman.shadow'
@@ -106,6 +113,86 @@ task expandTemplates(type: Copy) {
   }
 }
 
+task getPlugins() {
+  doLast {
+    def token = readToken()
+    def http = configure {
+      request.uri = getUploadServiceURI()
+    }
+
+    http.get {
+      request.uri.path = getUploadServicePath()
+      request.headers['Authorization'] = "Bearer ${token}"
+      response.success { fromServer, body ->
+        println body
+      }
+      response.failure { fromServer, body ->
+        def msg = httpErrorMsg("Error fetching plugins", fromServer, body)
+        throw new GradleException(msg)
+      }
+    }
+  }
+}
+
+task registerPlugin() {
+  doLast {
+    def token = readToken()
+    def http = configure {
+      request.uri = getUploadServiceURI()
+    }
+
+    def name = project.properties.get('SDK_FUNCTION_NAME')
+    def desc = project.properties.get('SDK_FUNCTION_DESC') ?: ''
+
+    http.post {
+      request.uri.path = getUploadServicePath()
+      request.contentType = 'application/json'
+      request.headers['Authorization'] = "Bearer ${token}"
+      request.body = "{\"name\": \"${name}\", \"description\": \"${desc}\"}"
+      response.success { fromServer, body ->
+        println "Registered plugin: ${name}. Response: ${body}"
+      }
+      response.failure { fromServer, body ->
+        def msg = httpErrorMsg("Error registering plugin ${name}", fromServer, body)
+        throw new GradleException(msg)
+      }
+    }
+  }
+}
+
+task uploadPlugin() {
+  doLast {
+    def pluginIdProperty = 'PLUGIN_ID'
+    if (!project.hasProperty(pluginIdProperty)) {
+      throw new InvalidUserDataException("Must specify plugin id via gradle property: ${pluginIdProperty}")
+    }
+    def id = project.properties.get(pluginIdProperty)
+    File plugin = new File('build/libs/data-pipelines-plugin-template.jar')
+
+    def token = readToken()
+    def http = configure {
+      request.uri = getUploadServiceURI()
+    }
+
+    http.post {
+      request.uri.path = "${getUploadServicePath()}/${id}/upload"
+      request.contentType = 'multipart/form-data'
+      request.headers['Authorization'] = "Bearer ${token}"
+      request.body = multipart {
+        part 'pluginJar', 'data-pipelines-plugin-template.jar', 'application/octet-stream', plugin
+      }
+      request.encoder 'multipart/form-data', ApacheEncoders.&multipart
+      response.success { fromServer, body ->
+        println "Uploaded jar file for plugin id: ${id}"
+      }
+      response.failure { fromServer, body ->
+        def msg = httpErrorMsg("Error uploading plugin ${name}", fromServer, body)
+        throw new GradleException(msg)
+      }
+    }
+  }
+}
+
 ext.renameJavaFile = { String dir, String templateName, String newFilename ->
   if (!dir.endsWith('/')) {
     throw new InvalidUserDataException("directory should end in slash: " + dir)
@@ -126,4 +213,34 @@ ext.addLine = { String filename, String newLine ->
   if (!lineFound) {
     file.append(newLine+"\n")
   }
+}
+
+ext.readToken = {
+  String tokenFileProperty = "SCLOUD_TOKEN_FILE"
+  if (!project.hasProperty(tokenFileProperty)) {
+    throw new InvalidUserDataException("Missing required gradle property: ${tokenFileProperty}")
+  }
+  String fileName = project.properties.get(tokenFileProperty)
+  File tokenFile = new File(fileName)
+  if (tokenFile.text.isEmpty()) {
+    throw new InvalidUserDataException("Token file is empty. File: ${fileName}")
+  }
+  return tokenFile.text.trim()
+}
+
+ext.httpErrorMsg = { String msg, FromServer fs, Object body ->
+  return "${msg}. Status code: ${fs.getStatusCode().toString()}. Response: ${body}"
+}
+
+ext.getUploadServiceURI = {
+  def proto = project.properties.get('PLUGIN_UPLOAD_SERVICE_PROTOCOL')
+  def host = project.properties.get('PLUGIN_UPLOAD_SERVICE_HOST')
+  def port = project.properties.get('PLUGIN_UPLOAD_SERVICE_PORT')
+  return "${proto}://${host}:${port}/"
+}
+
+ext.getUploadServicePath = {
+  def tenant = project.properties.get('TENANT_NAME') ?: 'default'
+  def endpoint = project.properties.get('PLUGIN_UPLOAD_SERVICE_ENDPOINT')
+  return "/${tenant}/${endpoint}"
 }
