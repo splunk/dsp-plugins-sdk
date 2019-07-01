@@ -1,5 +1,5 @@
 /*
- * ${SDK_COPYRIGHT_NOTICE}
+ * Copyright (c) 2019-2019 Splunk, Inc. All rights reserved.
  */
 
 package com.splunk.streaming.user.functions;
@@ -18,7 +18,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import java.util.List;
 import java.util.Map;
 
-public class ${SDK_CLASS_NAME}Function implements SinkFunction {
+public class TemplateSinkFunction implements SinkFunction {
 
   @Override
   public FunctionType getFunctionType() {
@@ -30,7 +30,7 @@ public class ${SDK_CLASS_NAME}Function implements SinkFunction {
 
   @Override
   public String getName() {
-    return "${SDK_FUNCTION_NAME}";
+    return "template-sink";
   }
 
   @Override
@@ -41,9 +41,7 @@ public class ${SDK_CLASS_NAME}Function implements SinkFunction {
   @Override
   public Map<String, Object> getAttributes() {
     Map<String, Object> attributes = Maps.newHashMap();
-    attributes.put(Attributes.NAME.toString(), "${SDK_UI_NAME}");
-    //attributes.put(Attributes.ICON.toString(), "Icon Name"); //TODO: Add ICON Name here
-    //attributes.put(Attributes.COLOR.toString(), "UI Color"); //TODO: Add UI Color here
+    attributes.put(Attributes.NAME.toString(), "Template Sink Function.");
     return attributes;
   }
 

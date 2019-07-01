@@ -48,6 +48,7 @@ dependencies {
   }
 
   testCompile group: 'com.splunk', name: 'splunk-streaming-flink-test', version: '2.4.0-SNAPSHOT'
+  testCompile group: 'com.splunk', name: 'splunk-streaming-scalar-functions', version: '2.4.0-SNAPSHOT'
   testCompile group: 'junit', name: 'junit', version: '4.12'
   testCompile group: 'org.mockito', name: 'mockito-core', version: '1.9.5'
 
@@ -70,46 +71,16 @@ task expandTemplates(type: Copy) {
   group 'templates'
   description 'Perform initial template expansion. Will overwrite any existing source.'
 
-  from ("${project.rootDir}/templates/${project.properties.get('SDK_FUNCTION_TYPE')}") {
+  // expands files from the given path to the src directory
+  // now allows multiple functions in one plugin
+  from ("${project.rootDir}/${project.properties.get('SDK_FUNCTIONS_PATH')}") {
     expand(project.properties)
   }
   into "${project.rootDir}/src"
   outputs.upToDateWhen { false }
 
   doLast {
-    // Rename streaming implementation templates
-    def mainDirBase = "${project.rootDir}/src/main/java/com/splunk/streaming/user/"
-    renameJavaFile(mainDirBase+"functions/", "Function.java", "${project.properties.SDK_CLASS_NAME}Function.java")
-
-    // Rename streaming test templates
-    if (project.properties.get('SDK_FUNCTION_TYPE') == 'scalar') {
-      def testDirBase = "${project.rootDir}/src/test/java/com/splunk/streaming/user/"
-      renameJavaFile(testDirBase, "TestFunction.java", "Test${project.properties.SDK_CLASS_NAME}Function.java")
-    } else {
-      def testDirBase = "${project.rootDir}/src/test-it/java/com/splunk/streaming/user/"
-      renameJavaFile(testDirBase, "TestFunctionIT.java", "Test${project.properties.SDK_CLASS_NAME}FunctionIT.java")
-    }
-
-    // Add plugin to META-INF/services file
-    def resourcesBase = "${project.rootDir}/src/main/resources/META-INF/services/"
-    new File(resourcesBase).mkdirs()
-
-    String className = "";
-    switch (project.properties.get('SDK_FUNCTION_TYPE')) {
-      case "scalar":
-        className = "com.splunk.streaming.upl3.core.ScalarFunction"
-        break
-      case "streaming":
-        className = "com.splunk.streaming.flink.streams.core.StreamingFunction"
-        break
-      case "sink":
-        className = "com.splunk.streaming.flink.streams.core.SinkFunction"
-        break
-      default:
-        throw new InvalidUserDataException("Unknown SDK function type: ${project.properties.get('SDK_FUNCTION_TYPE')}")
-        break
-    }
-    addLine(resourcesBase + className, "com.splunk.streaming.user.functions.${SDK_CLASS_NAME}Function")
+    // removing the renaming until we can talk about some new design.
   }
 }
 
@@ -141,8 +112,8 @@ task registerPlugin() {
       request.uri = getUploadServiceURI()
     }
 
-    def name = project.properties.get('SDK_FUNCTION_NAME')
-    def desc = project.properties.get('SDK_FUNCTION_DESC') ?: ''
+    def name = project.properties.get('SDK_PLUGIN_NAME')
+    def desc = project.properties.get('SDK_PLUGIN_DESC') ?: ''
 
     http.post {
       request.uri.path = getUploadServicePath()

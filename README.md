@@ -14,10 +14,7 @@ to create a custom plugin that runs in a DSP pipeline.
 * Run project setup using gradle:
 
 ```
-./gradlew expandTemplates \
-  -PSDK_CLASS_NAME=MyFunc \
-  -PSDK_FUNCTION_NAME=my-func \
-  -PSDK_UI_NAME="My Function"
+./gradlew expandTemplates -PSDK_FUNCTIONS_PATH=examples
 ```
 
 Note that `expandTemplates` should generally only be run once. It can be run again, but will overwrite any existing files
@@ -68,7 +65,7 @@ Next, configure Gradle to communicate with DSP by modifying plugin upload config
 
 Then, register the plugin with DSP:
 ```
-./gradlew registerPlugin
+./gradlew registerPlugin -PSDK_PLUGIN_NAME="sdk-examples" -PSDK_PLUGIN_DESC="Template SDK example functions."
 ```
 
 Note the `plugin_id` in the response. You can also list all plugins with their respective `plugin_id`s at anytime by running `./gradlew getPlugins`.
