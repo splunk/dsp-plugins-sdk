@@ -1,0 +1,23 @@
+#!/usr/bin/env groovy
+// Copyright (c) 2019-2019 Splunk, Inc. All rights reserved.
+
+apply plugin: 'java'
+applyIntegrationTests()
+
+dependencies {
+  compile depLibs.guava
+  compile depLibs.slf4jApi
+  compile depLibs.slf4jLog4j
+  compile depLibs.flinkStreamingJava
+  compile depLibs.splunkFlinkPlanner
+
+  testCompile depLibs.junit
+  testCompile depLibs.mockitoCore
+  testCompile depLibs.commonsCompress
+  testCompile depLibs.splunkFlinkTest
+  testCompile depLibs.splunkScalarFunction
+
+  configurations {
+    compile.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+  }
+}
