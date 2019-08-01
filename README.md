@@ -3,56 +3,71 @@
 A template used for DSP SDK plugins. This project will generate a skeleton plugin that can be further modified
 to create a custom plugin that runs in a DSP pipeline.
 
-## Build Requirements
+## [Build Requirements](#buildRequirements)
 
 * Java 8
 * Network access to repo.splunk.com
 
-## Getting Started
-
+## [Getting Started with Examples](#gettingStarted)
 * Clone this repository
+* Update `gradle.properties` (See [Gradle Properties](#gradleProperties)). Make sure the API endpoint is accessible
 * Run project setup using gradle:
+```
+# build dsp-plugin-examples module with example functions
+$ ./gradlew dsp-plugin-examples:build
 
+# register a plugin with DSP
+$ ./gradlew registerPlugin
+
+# list all the plugins
+$ ./gradlew getPlugins
+
+# upload the jar built in dsp-plugin-examples module to DSP
+$ ./gradlew uploadPlugin -PPLUGIN_ID=<id> -PPLUGIN_MODULE=dsp-plugin-examples
 ```
-./gradlew expandTemplates -PSDK_FUNCTIONS_PATH=examples
+
+Now the three functions `join-strings`, `map-expand` and `variable-write-log` in the example should be available in DSP function registry and can be used to create pipelines.
+
+
+## [Common Gradle Tasks](#commonTasks)
+### Set up boiler code in dsp-plugin-functions module
 ```
+./gradlew expandTemplates [-PSDK_FUNCTIONS_PATH=<path>]
+```
+By default, `expandTemplates` copies files from `templates` (set to `SDK_FUNCTIONS_PATH` in gradle.properties) to `dsp-plugin-functions` module.
 
 Note that `expandTemplates` should generally only be run once. It can be run again, but will overwrite any existing files
 with the same names.
 
-* Compile:
+### Build jars:
 
 ```
+# this builds all modules in this repo
 ./gradlew build
+
+# this builds only dsp-plugin-functions module
+./gradlew dsp-plugin-functions:build
 ```
 
-The plugin jar artifact will be found in `build/libs`.
+The plugin jar artifact will be found in `build/libs` in each module with name `<module>.jar`.
 
-* Commit to git, e.g.:
-
+### Register a plugin with DSP
 ```
-git add src/ && git commit
-```
-
-* Remove the git origin to avoid pushing back to this repository
-
-```
-git remote rm origin
+./gradlew registerPlugin [-PSDK_PLUGIN_NAME="sdk-examples" -PSDK_PLUGIN_DESC="Template SDK example functions."]
 ```
 
-* Push to a new repository and iterate as necessary
-
-## Register and Upload Plugin
-
-In order to use your newly created plugin function in a DSP pipeline, you must first register and upload it.
-
-First, build the JAR file:
+### List all plugins
 ```
-./gradlew build
+./gradlew getPlugins
 ```
 
-Next, configure Gradle to communicate with DSP by modifying plugin upload configuration in `gradle.properties`:
+### Upload a jar to a plugin
+```
+./gradlew uploadPlugin -PPLUGIN_ID=<id> [-PPLUGIN_MODULE=<module>]
+```
+By default, `PLUGIN_MODULE` is set to `dsp-plugin-functions` in gradle.properties.
 
+## [Gradle Properties Explained](#gradleProperties)
 `SCLOUD_TOKEN_FILE` - Path to a text file containing only the value of the `access_token` field in the response from `scloud login`. This value should not have quotes around it.
 
 `PLUGIN_UPLOAD_SERVICE_PROTOCOL` - `http` or `https`
@@ -62,15 +77,3 @@ Next, configure Gradle to communicate with DSP by modifying plugin upload config
 `PLUGIN_UPLOAD_SERVICE_PORT` - Typically, the port used by the DSP API (ex. `443`)
 
 `PLUGIN_UPLOAD_SERVICE_ENDPOINT` - Path to the DSP plugins endpoint (ex. `streams/v1/plugins`)
-
-Then, register the plugin with DSP:
-```
-./gradlew registerPlugin -PSDK_PLUGIN_NAME="sdk-examples" -PSDK_PLUGIN_DESC="Template SDK example functions."
-```
-
-Note the `plugin_id` in the response. You can also list all plugins with their respective `plugin_id`s at anytime by running `./gradlew getPlugins`.
-
-Finally, upload the plugin JAR, passing the `plugin_id` as a command line parameter:
-```
-./gradlew uploadPlugin -PPLUGIN_ID=<id>
-```
