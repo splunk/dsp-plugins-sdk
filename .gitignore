@@ -3,6 +3,7 @@
 build/
 bin/
 *.iml
+out/
 
 # IDE files
 .idea
