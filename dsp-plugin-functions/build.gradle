@@ -4,6 +4,13 @@
 apply plugin: 'java'
 applyIntegrationTests()
 
+apply plugin: 'idea'
+idea {
+  module {
+    downloadJavadoc = true
+  }
+}
+
 dependencies {
   compile depLibs.guava
   compile depLibs.slf4jApi
