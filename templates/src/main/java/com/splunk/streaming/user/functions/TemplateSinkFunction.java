@@ -30,7 +30,7 @@ public class TemplateSinkFunction implements SinkFunction {
 
   @Override
   public String getName() {
-    return "template-sink";
+    return "template_sink";
   }
 
   @Override

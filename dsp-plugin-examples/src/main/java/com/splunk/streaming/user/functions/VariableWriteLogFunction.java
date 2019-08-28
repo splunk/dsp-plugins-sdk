@@ -43,7 +43,7 @@ public class VariableWriteLogFunction implements SinkFunction, ArgumentValidator
 
   private static final long serialVersionUID = 1L;
   private static final Logger logger = LoggerFactory.getLogger(VariableWriteLogFunction.class);
-  private static final String NAME = "variable-write-log";
+  private static final String NAME = "variable_write_log";
   private static final String UI_NAME = "Variable Write Records";
   private static final String DESCRIPTION = "Write Records to the Flink Taskmanager Log, based on logging level defined in a field";
 

@@ -26,7 +26,7 @@ $ ./gradlew getPlugins
 $ ./gradlew uploadPlugin -PPLUGIN_ID=<id> -PPLUGIN_MODULE=dsp-plugin-examples
 ```
 
-Now the three functions `join-strings`, `map-expand` and `variable-write-log` in the example should be available in DSP function registry and can be used to create pipelines.
+Now the three functions `join_strings`, `map_expand` and `variable_write_log` in the example should be available in DSP function registry and can be used to create pipelines.
 
 
 ## API Documentation

@@ -41,7 +41,7 @@ public class TestVariableWriteLogFunctionIT {
     TestSource.registerSource("input", generateInputRecords(), inputSchema);
 
     // DSL for your test
-    String dsl = "variable-write-log(test-source(\"input\"), \"test-logger\", \"level\");";
+    String dsl = "variable_write_log(test-source(\"input\"), \"test-logger\", \"level\");";
 
     // Compile the dsl, run the pipeline, and validate results against an expected records list.
     runner.runSynchronousTestWithSink(dsl);

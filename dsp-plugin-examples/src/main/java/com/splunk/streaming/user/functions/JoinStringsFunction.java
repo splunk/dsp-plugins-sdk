@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class JoinStringsFunction implements ScalarFunction<String> {
 
-  private static final String NAME = "join-strings";
+  private static final String NAME = "join_strings";
   private static final String UI_NAME = "Join Strings";
   private static final String UI_DESCRIPTION = "Joins a list of strings with a provided delimiter.";
 

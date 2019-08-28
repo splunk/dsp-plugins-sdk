@@ -32,7 +32,7 @@ public class TemplateStreamingFunction implements StreamingFunction {
 
   @Override
   public String getName() {
-    return "template-streaming";
+    return "template_streaming";
   }
 
   @Override

@@ -44,7 +44,7 @@ import java.util.Set;
 public class MapExpandFunction implements StreamingFunction, ReturnTypeAdviser {
   private static final long serialVersionUID = 1L;
 
-  private static final String NAME = "map-expand";
+  private static final String NAME = "map_expand";
   private static final String UI_NAME = "Map Expand";
   private static final String UI_DESCRIPTION = "Takes a map and creates a new record for each key and value pair";
 

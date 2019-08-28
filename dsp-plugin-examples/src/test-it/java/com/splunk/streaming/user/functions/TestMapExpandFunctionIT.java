@@ -57,7 +57,7 @@ public class TestMapExpandFunctionIT {
     TestSource.registerSource("input", generateInputRecords(), inputSchema);
 
     // DSL for your test
-    String dsl = "map-expand(test-source(\"input\"), get(\"attributes\"), \"key\", \"value\");";
+    String dsl = "map_expand(test-source(\"input\"), get(\"attributes\"), \"key\", \"value\");";
 
     // Compile the dsl, run the pipeline, and validate results against an expected records list.
     runner.runSynchronousTest(dsl, generateExpectedRecords());

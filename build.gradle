@@ -124,7 +124,7 @@ task uploadPlugin() {
     File plugin = new File("${module}/build/libs/${module}.jar")
 
     def token = null
-    if (project.properties.get('PLUGIN_UPLOAD_SERVICE_PROTOCOL').equals('https')) {
+    if (project.properties.get('SCLOUD_TOKEN_FILE')?.trim()) {
       token = readToken()
     }
     def http = configure {
@@ -144,10 +144,45 @@ task uploadPlugin() {
       }
       request.encoder 'multipart/form-data', ApacheEncoders.&multipart
       response.success { fromServer, body ->
-        println "Uploaded jar file for plugin id: ${id}"
+        println "Uploaded jar file for plugin ID: ${id}"
       }
       response.failure { fromServer, body ->
         def msg = httpErrorMsg("Error uploading plugin ${name}", fromServer, body)
+        throw new GradleException(msg)
+      }
+    }
+  }
+}
+
+task deletePlugin() {
+  doLast {
+    def pluginIdProperty = 'PLUGIN_ID'
+    if (!project.hasProperty(pluginIdProperty)) {
+      throw new InvalidUserDataException("Must specify plugin id via gradle property: ${pluginIdProperty}")
+    }
+    def id = project.properties.get(pluginIdProperty)
+
+    def token = null
+    if (project.properties.get('SCLOUD_TOKEN_FILE')?.trim()) {
+      token = readToken()
+    }
+
+    def http = configure {
+      request.uri = getUploadServiceURI()
+    }
+
+    http.delete {
+      request.uri.path = "${getUploadServicePath()}/${id}"
+
+      if (token != null) {
+        request.headers['Authorization'] = "Bearer ${token}"
+      }
+
+      response.success { fromServer, body ->
+        println "Deleted plugin with ID: ${id}"
+      }
+      response.failure { fromServer, body ->
+        def msg = httpErrorMsg("Error deleting plugin with ID: ${id}", fromServer, body)
         throw new GradleException(msg)
       }
     }

@@ -29,7 +29,7 @@ public class TemplateScalarFunction implements ScalarFunction<Object> {
 
   @Override
   public String getName() {
-    return "template-scalar";
+    return "template_scalar";
   }
 
   @Override
