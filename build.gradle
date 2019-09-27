@@ -1,4 +1,4 @@
-import groovyx.net.http.ApacheEncoders
+import groovyx.net.http.OkHttpEncoders
 import groovyx.net.http.FromServer
 import static groovyx.net.http.HttpBuilder.configure
 import static groovyx.net.http.MultipartContent.multipart
@@ -15,7 +15,7 @@ buildscript {
 
   dependencies {
     classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
-    classpath 'io.github.http-builder-ng:http-builder-ng-apache:1.0.3'
+    classpath 'io.github.http-builder-ng:http-builder-ng-okhttp:1.0.3'
     classpath 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.2'
   }
 }
@@ -138,11 +138,11 @@ task uploadPlugin() {
       if (token != null) {
         request.headers['Authorization'] = "Bearer ${token}"
       }
-      
+
       request.body = multipart {
         part 'pluginJar', 'data-pipelines-plugin-template.jar', 'application/octet-stream', plugin
       }
-      request.encoder 'multipart/form-data', ApacheEncoders.&multipart
+      request.encoder 'multipart/form-data', OkHttpEncoders.&multipart
       response.success { fromServer, body ->
         println "Uploaded jar file for plugin ID: ${id}"
       }
