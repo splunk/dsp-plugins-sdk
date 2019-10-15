@@ -2,6 +2,7 @@ import groovyx.net.http.OkHttpEncoders
 import groovyx.net.http.FromServer
 import static groovyx.net.http.HttpBuilder.configure
 import static groovyx.net.http.MultipartContent.multipart
+import static groovyx.net.http.util.SslUtils.ignoreSslIssues
 
 apply plugin: 'java'
 
@@ -53,9 +54,8 @@ task getPlugins() {
     if (project.properties.get('SCLOUD_TOKEN_FILE')?.trim()) {
       token = readToken()
     }
-    def http = configure {
-      request.uri = getUploadServiceURI()
-    }
+
+    def http = getHttpConfig()
 
     http.get {
       request.uri.path = getUploadServicePath()
@@ -80,9 +80,7 @@ task registerPlugin() {
       token = readToken()
     }
 
-    def http = configure {
-      request.uri = getUploadServiceURI()
-    }
+    def http = getHttpConfig()
 
     def name = project.properties.get('SDK_PLUGIN_NAME')
     def desc = project.properties.get('SDK_PLUGIN_DESC') ?: ''
@@ -127,9 +125,8 @@ task uploadPlugin() {
     if (project.properties.get('SCLOUD_TOKEN_FILE')?.trim()) {
       token = readToken()
     }
-    def http = configure {
-      request.uri = getUploadServiceURI()
-    }
+
+    def http = getHttpConfig()
 
     http.post {
       request.uri.path = "${getUploadServicePath()}/${id}/upload"
@@ -167,9 +164,7 @@ task deletePlugin() {
       token = readToken()
     }
 
-    def http = configure {
-      request.uri = getUploadServiceURI()
-    }
+    def http = getHttpConfig()
 
     http.delete {
       request.uri.path = "${getUploadServicePath()}/${id}"
@@ -245,6 +240,20 @@ ext.readToken = {
 
 ext.httpErrorMsg = { String msg, FromServer fs, Object body ->
   return "${msg}. Status code: ${fs.getStatusCode().toString()}. Response: ${body}"
+}
+
+ext.getHttpConfig = {
+  def insecure = project.properties.get('PLUGIN_UPLOAD_INSECURE')
+  if (insecure.toString().toBoolean()) {
+    return configure {
+      ignoreSslIssues execution
+      request.uri = getUploadServiceURI()
+    }
+  } else {
+    return configure {
+      request.uri = getUploadServiceURI()
+    }
+  }
 }
 
 ext.getUploadServiceURI = {
