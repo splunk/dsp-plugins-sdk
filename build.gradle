@@ -39,7 +39,7 @@ subprojects {
     }
     maven {
       name "Commons AST"
-      url "https://repo.splunk.com/artifactory/docker/users/sng/commons-ast/master/"
+      url "https://repo.splunk.com/artifactory/maven-splunk-local/commons-ast/master/"
     }
   }
 }
