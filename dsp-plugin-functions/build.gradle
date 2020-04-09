@@ -20,6 +20,4 @@ dependencies {
   testCompile depLibs.commonsCompress
   testCompile depLibs.junit
   testCompile depLibs.mockitoCore
-  testCompile depLibs.splunkFlinkTest
-  testCompile depLibs.splunkScalarFunction
 }

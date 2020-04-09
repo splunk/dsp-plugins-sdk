@@ -8,10 +8,7 @@ apply plugin: 'java'
 
 buildscript {
   repositories {
-    maven {
-      name "Splunk Mirror - All"
-      url "https://repo.splunk.com/artifactory/maven/"
-    }
+    jcenter()
   }
 
   dependencies {
@@ -32,13 +29,10 @@ subprojects {
   }
 
   repositories {
+    jcenter()
     maven {
-      name "Splunk Mirror - All"
-      url "https://repo.splunk.com/artifactory/maven/"
-    }
-    maven {
-      name "Commons AST"
-      url "https://repo.splunk.com/artifactory/maven-splunk-local/commons-ast/master/"
+      name "Splunk Mirror - External"
+      url "https://splunk.jfrog.io/artifactory/maven-splunk-release/"
     }
   }
 }

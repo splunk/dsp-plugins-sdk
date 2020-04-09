@@ -20,8 +20,6 @@ dependencies {
   testCompile depLibs.junit
   testCompile depLibs.mockitoCore
   testCompile depLibs.commonsCompress
-  testCompile depLibs.splunkFlinkTest
-  testCompile depLibs.splunkScalarFunction
 
   configurations {
     compile.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
