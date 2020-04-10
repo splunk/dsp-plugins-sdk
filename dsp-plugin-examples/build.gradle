@@ -15,8 +15,9 @@ dependencies {
   compile depLibs.slf4jApi
   compile depLibs.slf4jLog4j
   compile depLibs.flinkStreamingJava
-  compile depLibs.splunkFlinkPlanner
-
+  compile (depLibs.splunkFlinkPlanner) {
+    exclude group: 'org.apache.flink', module: 'flink-connector-kinesis_2.11'
+  }
   testCompile depLibs.junit
   testCompile depLibs.mockitoCore
   testCompile depLibs.commonsCompress
