@@ -3,12 +3,9 @@
 A template used for DSP SDK plugins. This project will generate a skeleton plugin that can be further modified
 to create a custom plugin that runs in a DSP pipeline.
 
-For additional guidance, see the [documentation](https://confluence.splunk.com/display/PROD/Create+user+plugins+with+the+DSP+SDK).
-
 ## Build Requirements
 
 * Java 8
-* Network access to repo.splunk.com
 
 ## Getting Started with Examples
 * Clone this repository
