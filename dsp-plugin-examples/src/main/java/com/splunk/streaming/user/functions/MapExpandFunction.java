@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2019 Splunk, Inc. All rights reserved.
+ * Copyright (c) 2019-2020 Splunk, Inc. All rights reserved.
  */
 
 package com.splunk.streaming.user.functions;
@@ -22,6 +22,7 @@ import com.splunk.streaming.upl3.node.StringValue;
 import com.splunk.streaming.upl3.plugins.Attributes;
 import com.splunk.streaming.upl3.plugins.Categories;
 import com.splunk.streaming.upl3.type.CollectionType;
+import com.splunk.streaming.upl3.type.ExpressionType;
 import com.splunk.streaming.upl3.type.FunctionType;
 import com.splunk.streaming.upl3.type.MapType;
 import com.splunk.streaming.upl3.type.RecordType;
@@ -41,46 +42,72 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Streaming function example that operates on a record with a map and outputs one record for each key-value
+ * pair in the map, inserting the key and value as new fields in the record schema.
+ *
+ * Streaming functions are functions that accept a collection of records as input and output
+ * a collection of records.
+ *
+ * Example SPL usage (assumes input schema has a field called "mymap", which contains a map):
+ *
+ * ... | map_expand map=mymap key_field="foo" value_field="bar" | ...
+ */
 public class MapExpandFunction implements StreamingFunction, ReturnTypeAdviser {
   private static final long serialVersionUID = 1L;
 
+  /* Function name */
   private static final String NAME = "map_expand";
+  /* Name to be displayed in the DSP UI */
   private static final String UI_NAME = "Map Expand";
+  /* Description to be displayed in the DSP UI */
   private static final String UI_DESCRIPTION = "Takes a map and creates a new record for each key and value pair";
 
-  @Override
-  public String getName() {
-    return NAME;
-  }
+  /* Argument names */
+  private static final String INPUT_ARG = "input";
+  private static final String MAP_ARG = "map";
+  private static final String KEY_FIELD_ARG = "key_field";
+  private static final String VALUE_FIELD_ARG = "value_field";
 
+  /**
+   * This method defines the function signature for "map_expand", which takes
+   * five arguments:
+   *
+   * input: collection of records with an unknown schema, parameterized by type variable "R"
+   * map: an expression that evaluates to a map<string, M>
+   * key_field: string literal
+   * value_field: string literal
+   *
+   * and returns a collection of records (a stream) with some schema "S"
+   *
+   * Note: the first argument for functions that accept a collection of records must always be named "input".
+   *
+   * @return FunctionType which defines the function signature
+   */
   @Override
   public FunctionType getFunctionType() {
     return FunctionType.newStreamingFunctionBuilder(this)
-      // unknown input stream
-      .returns(new CollectionType(new RecordType(new TypeVariable("S"))))
       // unknown output stream
-      .addArgument("input", new CollectionType(new RecordType(new TypeVariable("R"))))
+      .returns(new CollectionType(new RecordType(new TypeVariable("S"))))
+      // unknown input stream
+      .addArgument(INPUT_ARG, new CollectionType(new RecordType(new TypeVariable("R"))))
       // map to expand on
-      .addArgument("map", new MapType(StringType.INSTANCE, new TypeVariable("M")))
+      .addArgument(MAP_ARG, new ExpressionType(new MapType(StringType.INSTANCE, new TypeVariable("M"))))
       // field names
-      .addArgument("key-field", StringType.INSTANCE)
-      .addArgument("value-field", StringType.INSTANCE)
+      .addArgument(KEY_FIELD_ARG, StringType.INSTANCE)
+      .addArgument(VALUE_FIELD_ARG, StringType.INSTANCE)
       .build();
   }
 
-  @Override
-  public List<Category> getCategories() {
-    return ImmutableList.of(Categories.FUNCTION.getCategory());
-  }
-
-  @Override
-  public Map<String, Object> getAttributes() {
-    Map<String, Object> attributes = Maps.newHashMap();
-    attributes.put(Attributes.NAME.toString(), UI_NAME);
-    attributes.put(Attributes.DESCRIPTION.toString(), UI_DESCRIPTION);
-    return attributes;
-  }
-
+  /**
+   * Called during type checking (pipeline validation) to get the concrete output schema of this function,
+   * since the output schema may depend on the input arguments.
+   * @param functionCall The FunctionCall node from the AST which defines the Program to be executed
+   * @param typeRegistry Contains all types registered with the type system
+   * @param context Contains contextual information that may be useful to determine the return type (for example
+   *                the input schema).
+   * @return The return type for this function
+   */
   @Override
   public Type getReturnType(FunctionCall functionCall, TypeRegistry typeRegistry, FunctionCallContext context) {
     List<NamedNode> argumentNodes = functionCall.getCanonicalizedArguments();
@@ -93,30 +120,25 @@ public class MapExpandFunction implements StreamingFunction, ReturnTypeAdviser {
       throw new IllegalArgumentException(String.format("Expecting 4 arguments found %d.", argumentNodes.size()));
     }
 
-    // If our input stream type is not yet resolved, return null
-    if (!Types.isStream(argumentNodes.get(0).getResultType())) {
-      return null;
-    }
-
-    // Throw expections to fail validation
+    // Throw exceptions to fail type checking
     mapType = argumentNodes.get(1).getNode().getResultType();
     // map type must be a map or unresolved.
     if (mapType instanceof TypeVariable) {
       return null;
     } else if (!(mapType instanceof MapType)) {
-      throw new IllegalArgumentException("[map] argument must be a map");
+      throw new IllegalArgumentException(String.format("[%s] argument must be a map", MAP_ARG));
     }
 
     try {
       keyField = ((StringValue) argumentNodes.get(2).getNode()).getValue();
     } catch (RuntimeException e) {
-      throw new IllegalArgumentException("[key-field] argument must be a constant string");
+      throw new IllegalArgumentException(String.format("[%s] argument must be a constant string", KEY_FIELD_ARG));
     }
 
     try {
       valueField = ((StringValue) argumentNodes.get(3).getNode()).getValue();
     } catch (RuntimeException e) {
-      throw new IllegalArgumentException("[value-field] argument must be a constant string");
+      throw new IllegalArgumentException(String.format("[%s] argument must be a constant string", VALUE_FIELD_ARG));
     }
 
     SchemaType inputSchema = Types.getSchema(argumentNodes.get(0).getResultType());
@@ -134,14 +156,21 @@ public class MapExpandFunction implements StreamingFunction, ReturnTypeAdviser {
     return new CollectionType(new RecordType(schemaBuilder.build()));
   }
 
+  /**
+   * This method is called at "plan time" (during pipeline activation). Defines the Flink operator to be run during
+   * job execution.
+   * @param functionCall The FunctionCall node from the AST which defines the Program to be executed
+   * @param context PlannerContext used to access the function arguments and record schema
+   * @param streamExecutionEnvironment Flink class that encapsulates the stream execution environment
+   */
   @Override
   public DataStream<Tuple> plan(FunctionCall functionCall, PlannerContext context, StreamExecutionEnvironment streamExecutionEnvironment) {
-    DataStream<Tuple> input = context.getArgument("input");
-    ScalarFunctionWrapper<Map<String, Object>> map = context.getArgument("map");
-    String keyField = context.getConstantArgument("key-field");
-    String valueField = context.getConstantArgument("value-field");
+    DataStream<Tuple> input = context.getArgument(INPUT_ARG);
+    ScalarFunctionWrapper<Map<String, Object>> map = context.getArgument(MAP_ARG);
+    String keyField = context.getConstantArgument(KEY_FIELD_ARG);
+    String valueField = context.getConstantArgument(VALUE_FIELD_ARG);
 
-    SerializableRecordDescriptor inputDescriptor = new SerializableRecordDescriptor(context.getDescriptorForArgument("input"));
+    SerializableRecordDescriptor inputDescriptor = new SerializableRecordDescriptor(context.getDescriptorForArgument(INPUT_ARG));
     SerializableRecordDescriptor outputDescriptor = new SerializableRecordDescriptor(context.getDescriptorForReturnType());
 
     MapExpand mapExpand = new MapExpand(inputDescriptor, outputDescriptor, map, keyField, valueField);
@@ -170,6 +199,12 @@ public class MapExpandFunction implements StreamingFunction, ReturnTypeAdviser {
       this.valueField = valueField;
     }
 
+    /**
+     * Called by Flink at runtime. Maps an input Tuple to one or more output Tuples
+     * @param value Tuple being processed
+     * @param out Collector which accepts output records from this function
+     * @throws Exception
+     */
     @Override
     public void flatMap(Tuple value, Collector<Tuple> out) throws Exception {
       Record inputRecord = new Record(inputDescriptor.toRecordDescriptor(), value);
@@ -199,5 +234,24 @@ public class MapExpandFunction implements StreamingFunction, ReturnTypeAdviser {
         out.collect(outputRecord.getTuple());
       }
     }
+  }
+
+  @Override
+  public String getName() {
+    return NAME;
+  }
+
+  @Override
+  public List<Category> getCategories() {
+    // this is a streaming function
+    return ImmutableList.of(Categories.STREAMING.getCategory());
+  }
+
+  @Override
+  public Map<String, Object> getAttributes() {
+    Map<String, Object> attributes = Maps.newHashMap();
+    attributes.put(Attributes.NAME.toString(), UI_NAME);
+    attributes.put(Attributes.DESCRIPTION.toString(), UI_DESCRIPTION);
+    return attributes;
   }
 }

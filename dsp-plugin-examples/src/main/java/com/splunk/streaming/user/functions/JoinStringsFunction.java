@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2019 Splunk, Inc. All rights reserved.
+ * Copyright (c) 2019-2020 Splunk, Inc. All rights reserved.
  */
 
 package com.splunk.streaming.user.functions;
@@ -19,41 +19,47 @@ import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Scalar function example that joins strings with a provided delimiter.
+ *
+ * Example SPL usage:
+ *
+ * ... | eval strings_joined = join_strings(["foo", upper("host"), "baz], "-");
+ */
 public class JoinStringsFunction implements ScalarFunction<String> {
 
+  /* Function name */
   private static final String NAME = "join_strings";
-  private static final String UI_NAME = "Join Strings";
-  private static final String UI_DESCRIPTION = "Joins a list of strings with a provided delimiter.";
 
+  /* Argument names */
+  private static final String STRINGS_ARG = "strings";
+  private static final String DELIMITER_ARG = "delimiter";
+
+  /**
+   * This method defines the function signature for "join_strings",
+   * which has two arguments:
+   *
+   * strings: a collection of strings
+   * delimiter: string
+   *
+   * and returns a string.
+   *
+   * @return FunctionType which defines the function signature
+   */
   @Override
   public FunctionType getFunctionType() {
     return FunctionType.newScalarFunctionBuilder(this)
       .returns(StringType.INSTANCE)
-      // add first argument which is a list of strings
-      .addArgument("strings", new CollectionType(StringType.INSTANCE))
-      // add second argument which is a string
-      .addArgument("delimiter", StringType.INSTANCE)
+      .addArgument(STRINGS_ARG, new CollectionType(StringType.INSTANCE))
+      .addArgument(DELIMITER_ARG, StringType.INSTANCE)
       .build();
   }
 
-  @Override
-  public String getName() {
-    return NAME;
-  }
-
-  @Override
-  public List<Category> getCategories() {
-    return ImmutableList.of(Categories.FUNCTION.getCategory());
-  }
-
-  @Override
-  public Map<String, Object> getAttributes() {
-    Map<String, Object> attributes = Maps.newHashMap();
-    attributes.put(Attributes.NAME.toString(), UI_NAME);
-    attributes.put(Attributes.DESCRIPTION.toString(), UI_DESCRIPTION);
-    return attributes;
-  }
-
+  /**
+   * Called at runtime to execute the scalar function.
+   * @param context RuntimeContext provides access to arguments
+   * @return joined string
+   */
   @Override
   public String call(RuntimeContext context) {
     // Get first argument by name
@@ -68,5 +74,21 @@ public class JoinStringsFunction implements ScalarFunction<String> {
 
     // return joined string
     return String.join(delimiter, strings);
+  }
+
+  @Override
+  public String getName() {
+    return NAME;
+  }
+
+  @Override
+  public List<Category> getCategories() {
+    // this is a scalar function
+    return ImmutableList.of(Categories.SCALAR.getCategory());
+  }
+
+  @Override
+  public Map<String, Object> getAttributes() {
+    return Maps.newHashMap();
   }
 }
