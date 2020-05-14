@@ -7,7 +7,6 @@ package com.splunk.streaming.user.functions;
 import com.splunk.streaming.upl3.core.RuntimeContext;
 import com.splunk.streaming.upl3.core.ScalarFunction;
 import com.splunk.streaming.upl3.language.Category;
-import com.splunk.streaming.upl3.plugins.Attributes;
 import com.splunk.streaming.upl3.plugins.Categories;
 import com.splunk.streaming.upl3.type.CollectionType;
 import com.splunk.streaming.upl3.type.FunctionType;
@@ -63,9 +62,9 @@ public class JoinStringsFunction implements ScalarFunction<String> {
   @Override
   public String call(RuntimeContext context) {
     // Get first argument by name
-    List<String> strings = context.getArgument("strings");
+    List<String> strings = context.getArgument(STRINGS_ARG);
     // Get second argument by name
-    String delimiter = context.getArgument("delimiter");
+    String delimiter = context.getArgument(DELIMITER_ARG);
 
     // validate arguments, return null if arguments are null
     if (strings == null || delimiter == null) {
