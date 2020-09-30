@@ -136,6 +136,7 @@ public class VariableWriteLogFunction implements SinkFunction {
     Map<String, Object> attributes = Maps.newHashMap();
     attributes.put(Attributes.NAME.toString(), UI_NAME);
     attributes.put(Attributes.DESCRIPTION.toString(), DESCRIPTION);
+    attributes.put(Attributes.IS_SPL_DATASET.toString(), true);
     return attributes;
   }
 

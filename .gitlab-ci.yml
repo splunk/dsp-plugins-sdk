@@ -23,7 +23,7 @@ build:compile:
   stage: build
   artifacts:
     paths:
-      - 'build'
+      - '*/build'
   script:
     - ./gradlew clean compileJava compileTestJava --continue
 
@@ -31,3 +31,10 @@ test:unit:
   stage: test
   script:
     - ./gradlew test -x compileJava -x compileTestJava --continue
+
+test:integration:
+  stage: test
+  dependencies:
+    - build:compile
+  script:
+    - ./gradlew integrationTest --continue

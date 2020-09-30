@@ -30,8 +30,15 @@ Optionally, delete the example plugin:
 ```
 $ ./gradlew deletePlugin -PPLUGIN_ID=<id>
 ```
-
-
+### Running the Unit and Integration Tests
+You can run the unit tests from the examples using gradle:
+```
+$ ./gradlew test
+```
+You can also run the integration tests:
+```
+$ ./gradlew integrationTest
+```
 ## SDK API Documentation
 All the Splunk jars dependent by this repo have their corresponding `*-javadoc.jar` available too. You can configure your IDE to download the `*-javadoc.jar` to view documentation.
 

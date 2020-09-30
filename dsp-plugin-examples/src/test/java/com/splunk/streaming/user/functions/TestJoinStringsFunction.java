@@ -5,7 +5,6 @@
 package com.splunk.streaming.user.functions;
 
 import com.splunk.streaming.upl3.core.RuntimeContext;
-import com.splunk.streaming.user.functions.JoinStringsFunction;
 
 import org.junit.Assert;
 import org.junit.Test;

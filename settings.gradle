@@ -4,3 +4,4 @@
 
 include 'dsp-plugin-examples'
 include 'dsp-plugin-functions'
+include 'test-runner'
