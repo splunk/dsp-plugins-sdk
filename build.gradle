@@ -6,6 +6,10 @@ import static groovyx.net.http.util.SslUtils.ignoreSslIssues
 
 apply plugin: 'java'
 
+def javaVersion = JavaVersion.VERSION_1_8
+sourceCompatibility = javaVersion
+targetCompatibility = javaVersion
+
 buildscript {
   repositories {
     jcenter()
@@ -36,10 +40,11 @@ subprojects {
       url "https://splunk.jfrog.io/artifactory/maven-splunk-release/"
     }
   }
-}
-tasks.withType(JavaCompile) { JavaCompile task ->
-  task.sourceCompatibility = project.property("javaCompiler.sourceCompatibility")
-  task.targetCompatibility = project.property("javaCompiler.targetCompatibility")
+
+  if (JavaVersion.current() != javaVersion) {
+    throw new GradleException("Wrong Java version: required is "
+            + javaVersion + ", but found " + JavaVersion.current())
+  }
 }
 
 task getPlugins() {
