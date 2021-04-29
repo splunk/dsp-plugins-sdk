@@ -9,7 +9,7 @@ ext {
 
 depVersions += [
   commonsCompress: '1.18',
-  dsp :   '1.2.0',
+  dsp :   '1.2.1',
   guava: '20.0',
   junit: '4.12',
   mockitoCore: '1.9.5',
